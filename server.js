@@ -25,7 +25,7 @@ app.get('/posts', (req, res) => {
       });
     });
 
-  app.get('/posts/:id', (req, res) => {
+app.get('/posts/:id', (req, res) => {
     var id = req.params.id;
     BlogPost
     .findById({_id: id}).then((post)=> {
@@ -37,7 +37,7 @@ app.get('/posts', (req, res) => {
       });
     });
 
-    app.post('/posts', (req, res) => {
+app.post('/posts', (req, res) => {
       const requiredFields = ['title', 'content', 'author'];
       for (let i = 0; i < requiredFields.length; i ++) {
         const field = requiredFields[i];
@@ -58,6 +58,35 @@ app.get('/posts', (req, res) => {
       res.send(post.apiRepr());
   });
 
+  app.put('/posts/:id', (req, res) => {
+      let id = req.params.id;
+      // if (!req.body.id.length) {
+      //     const message = `Missing id in request body`
+      //     console.error(message);
+      //     return res.status(400).send(message);
+      //     }
+      //
+      // if (req.params.id !== req.body.id) {
+      //     const message =
+      //       `Request path id ${id} and request body id
+      //       ${req.body.id} must match`;
+      //     console.error(message);
+      //     return res.status(400).send(message);
+      //   }
+
+      BlogPost
+        .findByIdAndUpdate(
+          {id},
+          {"title": req.body.title,
+          "content": req.body.content,
+          "author": req.body.author
+        }, (req, res) => {
+          console.log(`Updating blog post ${req.params.id}`);
+          res.status(200)
+          .send(res.body);
+        })
+        .catch(e) => console.error(e);
+    });
 
 let server;
 

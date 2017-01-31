@@ -47,6 +47,7 @@ app.post('/posts', (req, res) => {
           return res.status(400).send(message);
           }
         }
+
       var post = new BlogPost({
         title: req.body.title,
         content: req.body.content,
@@ -60,33 +61,86 @@ app.post('/posts', (req, res) => {
 
   app.put('/posts/:id', (req, res) => {
       let id = req.params.id;
-      // if (!req.body.id.length) {
-      //     const message = `Missing id in request body`
-      //     console.error(message);
-      //     return res.status(400).send(message);
-      //     }
-      //
-      // if (req.params.id !== req.body.id) {
-      //     const message =
-      //       `Request path id ${id} and request body id
-      //       ${req.body.id} must match`;
-      //     console.error(message);
-      //     return res.status(400).send(message);
-      //   }
+      if (!req.body.id.length) {
+          const message = `Missing id in request body`
+          console.error(message);
+          return res.status(400).send(message);
+          }
 
-      BlogPost
-        .findByIdAndUpdate(
-          {id},
-          {"title": req.body.title,
-          "content": req.body.content,
-          "author": req.body.author
-        }, (req, res) => {
-          console.log(`Updating blog post ${req.params.id}`);
-          res.status(200)
-          .send(res.body);
-        })
-        .catch(e) => console.error(e);
+      if (req.params.id !== req.body.id) {
+          const message =
+            `Request path id ${id} and request body id
+            ${req.body.id} must match`;
+          console.error(message);
+          return res.status(400).send(message);
+        }
+
+      // BlogPost
+      //   .findOneAndUpdate(
+      //     id,
+      //     {
+      //     "title": req.body.title,
+      //     "content": req.body.content,
+      //     "author": req.body.author
+      //     },
+      //     (req, res) => {
+      //     console.log(`Updating blog post ${req.params.id}`);
+      //     res.status(200)
+      //     .send(res.body);
+      //   })
+      //   .catch(e) => console.error(e);
+      //
+        let update = { title: req.body.title,
+                       content: req.body.content,
+                       author: req.body.author
+                     };
+
+        BlogPost.findByIdAndUpdate(req.params.id, update,(error, document) => {
+
+        	return new Promise((resolve, reject) => {
+
+        		if(error) {
+        			reject(error);
+        		} else {
+        			resolve(document);
+        		}
+
+        	}).then((document) => {
+        		res.status(201).json(document);
+        	}).catch((error) => {
+        		console.log(error);
+        	});
+        });
     });
+
+    app.delete('/posts/:id', (req, res) => {
+      console.log('hello');
+      let id = req.params.id;
+      BlogPost
+      .findByIdAndRemove(id, (err) => {
+        if (err) {
+          console.log(err);
+          return (err);
+        }
+        res.status(204).send();
+      });
+
+        console.log(id);
+
+        // return new Promise((resolve, reject) => {
+        //   if(err) {
+        //     reject(err);
+        //   } else {
+        //     console.log(doc)
+        //     resolve(doc);
+        //   }
+      //   }).then((doc) => {
+      //     res.status(204)
+      //   }).catch((error) => {
+      //     console.log(error);
+      //   });
+      // });
+    }); //app.delete
 
 let server;
 

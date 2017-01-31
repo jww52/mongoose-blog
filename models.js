@@ -1,56 +1,29 @@
 const mongoose = require('mongoose');
 
-// this is our schema to represent a restaurant
-const restaurantSchema = mongoose.Schema({
-  name: {type: String, required: true},
-  borough: {type: String, required: true},
-  cuisine: {type: String, required: true},
-  address: {
-    building: String,
-    // coord will be an array of string values
-    coord: [String],
-    street: String,
-    zipcode: String
+const blogPostSchema = mongoose.Schema({
+  title: {type: String, required: true},
+  content: {type: String, required: true},
+  author: {
+    firstName: {type: String, required: true},
+    lastName: {type: String, required: true}
   },
-  // grades will be an array of objects
-  grades: [{
-    date: Date,
-    grade: String,
-    score: Number
-  }]
+  created: {type: Number, required: false}
 });
 
-// *virtuals* (http://mongoosejs.com/docs/guide.html#virtuals)
-// allow us to define properties on our object that manipulate
-// properties that are stored in the database. Here we use it
-// to generate a human readable string based on the address object
-// we're storing in Mongo.
-restaurantSchema.virtual('addressString').get(function() {
-  return `${this.address.building} ${this.address.street}`.trim()});
+blogPostSchema.virtual('authorString').get(function() {
+  return `${this.author.firstName} ${this.author.lastName}`.trim()});
 
-// this virtual grabs the most recent grade for a restaurant.
-restaurantSchema.virtual('grade').get(function() {
-  const gradeObj = this.grades.sort((a, b) => {return b.date - a.date})[0] || {};
-  return gradeObj.grade;
-});
-
-// this is an *instance method* which will be available on all instances
-// of the model. This method will be used to return an object that only
-// exposes *some* of the fields we want from the underlying data
-restaurantSchema.methods.apiRepr = function() {
+blogPostSchema.methods.apiRepr = function() {
 
   return {
     id: this._id,
-    name: this.name,
-    cuisine: this.cuisine,
-    borough: this.borough,
-    grade: this.grade,
-    address: this.addressString
-  };
-}
+    title: this.title,
+    author: this.authorString,
+    content: this.content,
+    created: this.createdDate || Date.now()
+  }
+};
 
-// note that all instance methods and virtual properties on our
-// schema must be defined *before* we make the call to `.model`.
-const Restaurant = mongoose.model('Restaurant', restaurantSchema);
+const BlogPost = mongoose.model('Posts', blogPostSchema);
 
-module.exports = {Restaurant};
+module.exports = {BlogPost};
